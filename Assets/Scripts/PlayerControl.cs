@@ -17,7 +17,6 @@ public class PlayerControl : MonoBehaviour
     private Vector3 direction;
     private float h, v;
     private Rigidbody body;
-    private Animator anim;
     private bool IsWalking;
 
     void Awake()
@@ -27,7 +26,6 @@ public class PlayerControl : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         isGround = true;
         body = GetComponent<Rigidbody>();
-        anim = player.GetComponent<Animator>();
     }
 
     void FixedUpdate()
