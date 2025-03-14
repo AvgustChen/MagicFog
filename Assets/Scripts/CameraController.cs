@@ -5,19 +5,18 @@ public class CameraController : MonoBehaviour
 {
     public GameObject player;
     [SerializeField] private float speedRotation = 5f;
-    private float y = 0;
-    private float x = 0;
+    private float y;
+    private float x;
 
-    void Update()
+    void FixedUpdate()
     {
         RotateCamera();
     }
 
     private void RotateCamera()
     {
-        transform.Rotate(0, Input.GetAxis("Mouse X") * speedRotation * Time.deltaTime, 0);
         var RotY = Input.GetAxis("Mouse Y");
-        var RotX = Input.GetAxis("Mouse X") * speedRotation;
+        var RotX = Input.GetAxis("Mouse X");
         y -= RotY * speedRotation;
         y = Mathf.Clamp(y, -15, 15);
         x += RotX * speedRotation;

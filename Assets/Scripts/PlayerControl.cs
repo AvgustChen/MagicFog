@@ -3,20 +3,26 @@ using UnityEngine;
 
 public class PlayerControl : MonoBehaviour
 {
-    public static PlayerControl Instance {get; private set;}
-    public event EventHandler AnimatorEvent;
-    [SerializeField] private float walkSpeed = 1.5f; // макс. скорость
-    [SerializeField] private float runSpeed = 50f; // макс. скорость
+    public static PlayerControl Instance { get; private set; }
+    
+    public event EventHandler JumpEvent;
+    public event EventHandler AttackEvent;
+    public event EventHandler WalkSoundEvent;
+    public event EventHandler IdleSoundEvent;
+
+    [SerializeField] private float walkSpeed = 1.5f; // максимальная скорость
+    [SerializeField] private float runSpeed = 50f; // максимальная скорость
     [SerializeField] private float moveSpeed;
     [SerializeField] private float acceleration = 100f; // ускорение
     [SerializeField] private KeyCode jumpButton = KeyCode.Space;
-    [SerializeField] private float jumpForce = 10; // сила прыжка
+    [SerializeField] private KeyCode attackButton = KeyCode.Mouse0;
+    [SerializeField] private float jumpForce = 5; // сила прыжка
     [SerializeField] private GameObject player;
-    [SerializeField] private GameObject followPoint;
     [SerializeField] private bool isGround;
-    private Vector3 direction;
-    private float h, v;
+    [SerializeField] private Transform followPoint;
+
     private Rigidbody body;
+    private Vector3 direction;
     private bool IsWalking;
 
     void Awake()
@@ -36,33 +42,34 @@ public class PlayerControl : MonoBehaviour
     void GetJump()
     {
         body.velocity = new Vector2(0, jumpForce);
+        JumpEvent?.Invoke(this, EventArgs.Empty);
     }
 
     void Update()
     {
-
-        if (Input.GetKeyDown(jumpButton))
+        if (Input.GetKeyDown(jumpButton) && isGround)
         {
-            if (isGround)
-                GetJump();
+            GetJump();
+        }
+        if (Input.GetKeyDown(attackButton))
+        {
+            AttackEvent?.Invoke(this, EventArgs.Empty);
         }
     }
+
     void Move()
     {
         body.AddForce(direction.normalized * moveSpeed * acceleration * body.mass);
 
-        h = Input.GetAxis("Horizontal");
-        v = Input.GetAxis("Vertical");
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
         if (h != 0 || v != 0)
         {
-            player.transform.forward = direction;
+            player.transform.forward = direction.normalized;
         }
-
-
         direction = new Vector3(h, 0, v);
-        direction = Camera.main.transform.TransformDirection(direction);
+        direction = followPoint.transform.TransformDirection(direction);
         direction = new Vector3(direction.x, 0, direction.z);
-
 
         if (Mathf.Abs(body.velocity.x) > moveSpeed)
         {
@@ -74,7 +81,11 @@ public class PlayerControl : MonoBehaviour
         }
 
 
-        if (direction != Vector3.zero && !Input.GetKey(KeyCode.LeftShift))
+        if (direction == Vector3.zero)
+        {
+            Idle();
+        }
+        else if (direction != Vector3.zero && !Input.GetKey(KeyCode.LeftShift))
         {
             Walk();
         }
@@ -82,28 +93,33 @@ public class PlayerControl : MonoBehaviour
         {
             Run();
         }
-        else if (direction == Vector3.zero)
-        {
-            Idle();
-        }
-
-
     }
+
+    private void Run()
+    {
+        moveSpeed = runSpeed;
+        IsWalking = true;
+    }
+
+    private void Walk()
+    {
+        moveSpeed = walkSpeed;
+        if (!IsWalking)
+        {
+            IsWalking = true;
+            WalkSoundEvent?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     void Idle()
     {
         moveSpeed = 0;
-        IsWalking = false;
-    }
+        if (IsWalking)
+        {
+            IsWalking = false;
+            IdleSoundEvent?.Invoke(this, EventArgs.Empty);
+        }
 
-    void Walk()
-    {
-            moveSpeed = walkSpeed;
-            IsWalking = true;
-    }
-
-    void Run()
-    {
-            moveSpeed = runSpeed;
     }
 
     void OnCollisionEnter(Collision collision)
