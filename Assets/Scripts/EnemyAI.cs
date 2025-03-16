@@ -1,23 +1,31 @@
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 
 public class EnemyAI : MonoBehaviour, ICanTakeDamage
 {
-    private float health;
-    private float startHealth;
-    private float speed = 3f;
-    private float attackRange = 2f;
-    private float impactForce;
-    private float radiusFindPlayer = 10;
-    private Transform player;
-    bool isAttack;
-    bool canAttack;
-    public GameObject dieParticl;
-    bool isDie;
+    public event EventHandler DieEvent;
+    public event EventHandler HitEvent;
+    public event EventHandler AttackEvent;
 
-    private void Start()
+    [SerializeField] private float healthMax;
+    [SerializeField] private float level;
+    [SerializeField] private float speed = 3f;
+    [SerializeField] private float attackRange = 2f;
+    [SerializeField] private float impactForce;
+    [SerializeField] private float radiusFindPlayer = 10;
+    private Transform player;
+    private float health;
+    private bool isAttack;
+    private bool canAttack;
+    private bool canMove;
+    private bool isDie;
+
+    private void Awake()
     {
-        startHealth = health;
+        player = FindObjectOfType<Player>().gameObject.transform;
+        health = healthMax;
         canAttack = true;
     }
     private void Update()
@@ -34,7 +42,7 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
             // Нападаем на игрока
             if (!isAttack && canAttack)
             {
-
+                Attack();
             }
 
         }
@@ -59,16 +67,66 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
 
     private void Attack()
     {
+        AttackEvent?.Invoke(this, EventArgs.Empty);
 
+        isAttack = true;
+        canMove = false;
+        canAttack = false;
     }
 
     private void Die()
     {
+        if (!isDie)
+        {
+            DieEvent?.Invoke(this, EventArgs.Empty);
+            isDie = true;
+            canAttack = false;
+            canMove = false;
+            Invoke("DestroyThis", 3f);
+        }
 
+    }
+
+    private void DestroyThis()
+    {
+        Destroy(this.gameObject);
     }
 
     public void Damage(int amountDamage)
     {
-       
+        GetComponent<EnemyUI>().GetHit(amountDamage);
+
+        canMove = false;
+        canAttack = false;
+        health -= amountDamage;
+        if (health < 0) health = 0;
+        if (health == 0) Die();
     }
+
+    public void CanMoveAttackSetTrue()
+    {
+        canMove = true;
+        canAttack = true;
+        isAttack = false;
+    }
+
+    public float GetHealth()
+    {
+        return health;
+    }
+    public float GetHealthMax()
+    {
+        return healthMax;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player" && isAttack)
+        {
+            int rand = UnityEngine.Random.Range(0, (int)impactForce);
+            Player.Instance.Damage(rand);
+        }
+    }
+
+
 }

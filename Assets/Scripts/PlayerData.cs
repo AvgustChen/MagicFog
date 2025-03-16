@@ -11,6 +11,7 @@ public class PlayerData : MonoBehaviour
     private float mana;
     [SerializeField] private float progressMax;
     private float progress;
+    [SerializeField] private float impactForce;
     private Vector3 respawnPoint;
 
     private void Awake()
@@ -124,6 +125,11 @@ public class PlayerData : MonoBehaviour
     public void Respawn()
     {
         transform.position = respawnPoint;
+    }
+
+    public float GetImpactForce()
+    {
+        return impactForce;
     }
 
 }

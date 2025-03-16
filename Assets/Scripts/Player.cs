@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -157,5 +158,15 @@ public class Player : MonoBehaviour
     public void Die()
     {
         DieEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        var takeDamage = other.gameObject.GetComponent(typeof(ICanTakeDamage));
+        if(takeDamage != null)
+        {
+            int rand = UnityEngine.Random.Range(0, (int)PlayerData.Instance.GetImpactForce());
+            other.GetComponent<EnemyAI>().Damage(rand);
+        }
     }
 }
