@@ -8,12 +8,12 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        PlayerControl.Instance.AttackEvent += PlayerControl_AttackEvent;
-        PlayerControl.Instance.WalkSoundEvent += PlayerControl_WalkSoundEvent;
-        PlayerControl.Instance.IdleSoundEvent += PlayerControl_IdleSoundEvent;   
+        Player.Instance.AttackEvent += Player_AttackEvent;
+        Player.Instance.WalkSoundEvent += Player_WalkSoundEvent;
+        Player.Instance.IdleSoundEvent += Player_IdleSoundEvent;   
     }
 
-    private void PlayerControl_IdleSoundEvent(object sender, EventArgs e)
+    private void Player_IdleSoundEvent(object sender, EventArgs e)
     {
         if(walk.isPlaying)
         {
@@ -21,7 +21,7 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    private void PlayerControl_WalkSoundEvent(object sender, EventArgs e)
+    private void Player_WalkSoundEvent(object sender, EventArgs e)
     {
         if(!walk.isPlaying)
         {
@@ -29,9 +29,9 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    private void PlayerControl_AttackEvent(object sender, EventArgs e)
+    private void Player_AttackEvent(object sender, EventArgs e)
     {
         int rand = UnityEngine.Random.Range(0, attack.Length);
-        AudioSource.PlayClipAtPoint(attack[rand], PlayerControl.Instance.transform.position, 1f);
+        AudioSource.PlayClipAtPoint(attack[rand], Player.Instance.transform.position, 1f);
     }
 }
