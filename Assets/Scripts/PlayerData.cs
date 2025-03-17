@@ -5,6 +5,9 @@ public class PlayerData : MonoBehaviour
 {
     public static PlayerData Instance;
 
+    public event EventHandler LevelUpEvent;
+
+    private int level;
     [SerializeField] private float healthMax;
     private float health;
     [SerializeField] private float manaMax;
@@ -44,7 +47,7 @@ public class PlayerData : MonoBehaviour
 
     public void AddHealth(int health)
     {
-        if(this.health + health < healthMax)
+        if (this.health + health < healthMax)
         {
             this.health += health;
         }
@@ -56,7 +59,7 @@ public class PlayerData : MonoBehaviour
 
     public void DecreaseHealth(int health)
     {
-        if(this.health - health > 0)
+        if (this.health - health > 0)
         {
             this.health -= health;
         }
@@ -77,7 +80,7 @@ public class PlayerData : MonoBehaviour
 
     public void AddMana(int mana)
     {
-        if(this.mana + mana < manaMax)
+        if (this.mana + mana < manaMax)
         {
             this.mana += mana;
         }
@@ -89,7 +92,7 @@ public class PlayerData : MonoBehaviour
 
     public void DecreaseMana(int mana)
     {
-        if(this.mana - mana > 0)
+        if (this.mana - mana > 0)
         {
             this.mana -= mana;
         }
@@ -104,6 +107,11 @@ public class PlayerData : MonoBehaviour
     {
         return progress;
     }
+
+    public int GetLevel()
+    {
+        return level;
+    }
     public float GetProgressMax()
     {
         return progressMax;
@@ -111,15 +119,25 @@ public class PlayerData : MonoBehaviour
 
     public void AddProgress(int progress)
     {
-        if(this.progress + progress < progressMax)
+        if (this.progress + progress < progressMax)
         {
             this.progress += progress;
         }
         else
         {
             this.progress = progressMax;
-            Player.Instance.LevelUp();
+            LevelUp();
         }
+        PlayerUI.Instance.SetProgress();
+    }
+
+    public void LevelUp()
+    {
+        LevelUpEvent?.Invoke(this, EventArgs.Empty);
+        level++;
+        progressMax = (float)Math.Round(progressMax * (1.6));
+        PlayerUI.Instance.SetLevel();
+        
     }
 
     public void Respawn()

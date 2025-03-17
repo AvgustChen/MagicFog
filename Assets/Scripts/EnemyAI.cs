@@ -22,9 +22,12 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
     private bool canMove;
     private bool isDie;
 
+    private EnemyUI enemyUI;
+
     private void Awake()
     {
         player = FindObjectOfType<Player>().gameObject.transform;
+        enemyUI = GetComponent<EnemyUI>();
         health = healthMax;
         canAttack = true;
     }
@@ -48,8 +51,10 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
         }
         else
         {
-            // Бежим к игроку
-            MoveTowardsPlayer();
+            if (canMove)
+            {// Бежим к игроку
+                MoveTowardsPlayer();
+            }
         }
 
     }
@@ -94,13 +99,23 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
 
     public void Damage(int amountDamage)
     {
-        GetComponent<EnemyUI>().GetHit(amountDamage);
+        if (!isDie)
+        {
+            enemyUI.GetHit(amountDamage);
+            HitEvent?.Invoke(this, EventArgs.Empty);
+            canMove = false;
+            canAttack = false;
+            health -= amountDamage;
+            if (health <= 0)
+            {
+                Die();
+                enemyUI.Die();
+                int amountProgress = (int)Math.Round(10 * (10 + level - PlayerData.Instance.GetLevel() / (10 + PlayerData.Instance.GetLevel())));
+                PlayerData.Instance.AddProgress(amountProgress);
+            }
 
-        canMove = false;
-        canAttack = false;
-        health -= amountDamage;
-        if (health < 0) health = 0;
-        if (health == 0) Die();
+        }
+
     }
 
     public void CanMoveAttackSetTrue()
@@ -114,6 +129,7 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage
     {
         return health;
     }
+
     public float GetHealthMax()
     {
         return healthMax;

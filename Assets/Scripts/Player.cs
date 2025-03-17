@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour
     private float timerAttackStart = .7f;
     private bool IsWalking;
     private bool canMove;
+    private bool isAttack;
 
     void Awake()
     {
@@ -36,6 +38,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         canMove = true;
+        isAttack = false;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         body = GetComponent<Rigidbody>();
@@ -136,7 +139,15 @@ public class Player : MonoBehaviour
 
     private void Attack()
     {
+        isAttack = true;
         AttackEvent?.Invoke(this, EventArgs.Empty);
+        StartCoroutine(SetIsAttackFalse());
+    }
+
+    private IEnumerator SetIsAttackFalse()
+    {
+        yield return new WaitForSeconds(.7f);
+        isAttack = false;
     }
 
     public bool GetIsWalking()
@@ -150,11 +161,6 @@ public class Player : MonoBehaviour
         PlayerData.Instance.TakeDamage(amountDamage);
     }
 
-    public void LevelUp()
-    {
-
-    }
-
     public void Die()
     {
         DieEvent?.Invoke(this, EventArgs.Empty);
@@ -163,7 +169,7 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         var takeDamage = other.gameObject.GetComponent(typeof(ICanTakeDamage));
-        if(takeDamage != null)
+        if(takeDamage != null && isAttack)
         {
             int rand = UnityEngine.Random.Range(0, (int)PlayerData.Instance.GetImpactForce());
             other.GetComponent<EnemyAI>().Damage(rand);

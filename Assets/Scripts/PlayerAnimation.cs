@@ -9,21 +9,29 @@ public class PlayerAnimation : MonoBehaviour
 
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject swordFX;
+    [SerializeField] private GameObject LevelUpFX;
     private Animator animator;
     private void Awake()
     {
         animator = player.GetComponent<Animator>();
+        
     }
 
     private void Start()
     {
         Player.Instance.AttackEvent += PlayerControlAttackEvent;
         Player.Instance.DieEvent += PlayerControlDieEvent;
+        PlayerData.Instance.LevelUpEvent += PlayerData_LevelUpEvent;
     }
 
     private void Update()
     {
         animator.SetBool(ISWALKING, Player.Instance.GetIsWalking());
+    }
+
+    private void PlayerData_LevelUpEvent(object sender, EventArgs e)
+    {
+        LevelUpFX.SetActive(true);
     }
 
     private void PlayerControlDieEvent(object sender, EventArgs e)

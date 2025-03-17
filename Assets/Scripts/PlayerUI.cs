@@ -11,6 +11,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Text manaText;
     [SerializeField] private Image progressBar;
     [SerializeField] private Text progressText;
+    [SerializeField] private Text levelText;
 
     private void Awake()
     {
@@ -22,6 +23,7 @@ public class PlayerUI : MonoBehaviour
         SetHealth();
         SetMana();
         SetProgress();
+        SetLevel();
     }
 
     public void SetHealth()
@@ -41,5 +43,10 @@ public class PlayerUI : MonoBehaviour
     {
         progressText.text = PlayerData.Instance.GetProgress().ToString() + "/" + PlayerData.Instance.GetProgressMax();
         progressBar.fillAmount = PlayerData.Instance.GetProgress() / PlayerData.Instance.GetProgressMax();
+    }
+
+    public void SetLevel()
+    {
+        levelText.text = PlayerData.Instance.GetLevel().ToString();
     }
 }
